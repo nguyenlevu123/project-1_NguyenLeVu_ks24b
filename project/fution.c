@@ -1,70 +1,172 @@
-#include <stdio.h>   // Thu vien nhap xuat co ban (printf, scanf, fgets,...)
-#include <stdlib.h>  // Thu vien chua cac ham quan ly bo nho, chuyen doi kieu,...
-#include <stdbool.h> // Thu vien ho tro kieu du lieu boolean (true/false)
-#include <string.h>  // Thu vien ho tro xu ly chuoi (fgets, strcspn,...)
-#define MAX_STUDENTS 100 // Dinh nghia so luong sinh vien toi da trong danh sach
-#include "datatype.h"  // Gom dinh nghia struct `Student` (gia su la nhu vay)
-#include "funtion.h"   // Gom khai bao cac ham nhu `displayMenu`, `displayStudents`, `addStudent`,...
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#define MAX_STUDENTS 100
+#include "datatype.h"
+#include "funtion.h"
 
-Student students[MAX_STUDENTS];  // Mang luu danh sach sinh vien
-int studentCount = 0;            // Bien dem so luong sinh vien hien co trong danh sach
-        
+Student students[MAX_STUDENTS];  
+int studentCount = 0;            
+
+void pressAnyKeyToExit() { 
+    printf("\nPress any key to return...");
+    getchar(); // Read Enter key if exists
+    getchar(); // Wait for user input
+}
+
+void saveStudents() {
+    FILE *file = fopen("user.bin", "wb");
+    if (file) {
+        fwrite(&studentCount, sizeof(int), 1, file);
+        fwrite(students, sizeof(Student), studentCount, file);
+        fclose(file);
+    }
+}
+
+void loadStudents(){
+    FILE *file = fopen("user.bin", "rb");
+    if (file) {
+        fread(&studentCount, sizeof(int), 1, file);
+        if (studentCount > 0 && studentCount <= MAX_STUDENTS) {
+            fread(students, sizeof(Student), studentCount, file);
+        } else {
+            studentCount = 0; // Reset if data is invalid
+        }
+    }
+}
+
 void displayMenu() {
     printf("===============================\n");
-    printf("%7sQUAN LY SINH VIEN\n","");  // Can giua tieu de bang cach in 7 dau cach
+    printf("%7sSTUDENT MANAGEMENT\n", "");
     printf("===============================\n");
-    printf("1. Hien thi danh sach sinh vien\n");
-    printf("2. Them sinh vien\n");
-    printf("3. Sua thong tin sinh vien\n");
-    printf("4. Xoa sinh vien\n");
-    printf("5. Sap xep danh sach sinh vien\n");
-    printf("6. Thoat\n");
-    printf("Nhap lua chon: ");
+    printf("1. Show student list\n");
+    printf("2. Add students\n");
+    printf("3. Edit student information\n");
+    printf("4. Delete student\n"); 
+    printf("5. Sort student list\n");
+    printf("6. Exit\n");
+    printf("Enter selection: ");
 }
 
 void displayStudents() {
     if (studentCount == 0) {
-        printf("Danh sach sinh vien trong!\n");
+        printf("Student list is empty!\n");
         return;
     }
 
     printf("-----------------------------------------------------------\n");
-    printf("| %-5s | %-20s | %-5s | %-20s |\n", "ID", "Ten", "Tuoi", "Nganh hoc");
+    printf("| %-5s | %-20s | %-5s | %-16s |\n", "ID", "Name", "Age", "Major");
     printf("-----------------------------------------------------------\n");
 
     for (int i = 0; i < studentCount; i++) {
-        printf("| %-5d | %-20s | %-5d | %-20s |\n", 
+        printf("| %-5d | %-20s | %-5d | %-16s |\n", 
                students[i].id, students[i].name, students[i].age, students[i].major);
     }
 
     printf("-----------------------------------------------------------\n");
+    saveStudents();
+    pressAnyKeyToExit(); // Wait for user input
 }
 
-
 void addStudent() {
-    if (studentCount >= MAX_STUDENTS) {  // Kiem tra neu danh sach da day
-        printf("Khong the them sinh vien, danh sach da day.\n");
+    if (studentCount >= MAX_STUDENTS) {  
+        printf("Cannot add student, the list is full.\n");
         return;
     }
 
-    Student newStudent;  // Tao mot sinh vien moi de nhap thong tin
-    printf("Nhap ID: ");
-    scanf("%d", &newStudent.id);  // Nhap ID cua sinh vien
+    Student newStudent;
+    printf("Enter ID: ");
+    scanf("%d", &newStudent.id);
+    
+    getchar();
+    
+    printf("Enter name: ");
+    fgets(newStudent.name, sizeof(newStudent.name), stdin);
+    newStudent.name[strcspn(newStudent.name, "\n")] = 0;
 
-    printf("Nhap ten: ");
-    getchar();  // Loai bo ky tu '\n' con sot lai trong bo dem nhap
-    fgets(newStudent.name, sizeof(newStudent.name), stdin);  // Nhap ten
-    newStudent.name[strcspn(newStudent.name, "\n")] = 0; // Xoa ky tu xuong dong '\n'
+    printf("Enter age: ");
+    scanf("%d", &newStudent.age);
+    getchar();
 
-    printf("Nhap tuoi: ");
-    scanf("%d", &newStudent.age);  // Nhap tuoi sinh vien
+    printf("Enter major: ");
+    fgets(newStudent.major, sizeof(newStudent.major), stdin);
+    newStudent.major[strcspn(newStudent.major, "\n")] = 0;
 
-    printf("Nhap nganh hoc: ");
-    getchar();  // Loai bo ky tu '\n' con sot lai trong bo dem nhap
-    fgets(newStudent.major, sizeof(newStudent.major), stdin); // Nhap nganh hoc
-    newStudent.major[strcspn(newStudent.major, "\n")] = 0; // Xoa ky tu xuong dong '\n'
+    students[studentCount++] = newStudent;
+    printf("Successfully added student!\n");
 
-    students[studentCount++] = newStudent;  // Luu vao danh sach va tang bien dem
-    printf("Them sinh vien thanh cong!\n");
+    saveStudents();
+    pressAnyKeyToExit();
+}
+
+void editStudent() {  
+    int id, choice, found = 0;
+
+    printf("Enter student ID to edit: "); 
+    if (scanf("%d", &id) != 1) { 
+        printf("Error: ID must be an integer!\n");
+        while (getchar() != '\n');
+        return;
+    }
+    getchar();
+
+    for (int i = 0; i < studentCount; i++) { 
+        if (students[i].id == id) { 
+            found = 1;
+            while (1) { 
+                printf("\n===== Edit student information ID %d =====\n", id);
+                printf("1. Edit name\n");
+                printf("2. Edit age\n");
+                printf("3. Edit major\n");
+                printf("4. Return\n");
+                printf("Choice: ");
+                if (scanf("%d", &choice) != 1) {
+                    printf("Error: Please enter a number!\n");
+                    while (getchar() != '\n');
+                    continue;
+                }
+                getchar();
+
+                switch (choice) {
+                    case 1:
+                        printf("Enter new name: ");
+                        fgets(students[i].name, sizeof(students[i].name), stdin);
+                        students[i].name[strcspn(students[i].name, "\n")] = '\0';
+                        printf("Name updated successfully!\n");
+                        break;
+                    case 2:
+                        printf("Enter new age: ");
+                        int newAge;
+                        if (scanf("%d", &newAge) != 1 || newAge <= 0) {
+                            printf("Error: Age must be a positive integer!\n");
+                            while (getchar() != '\n');
+                            continue;
+                        }
+                        students[i].age = newAge;
+                        getchar();
+                        printf("Age updated successfully!\n");
+                        break;
+                    case 3:
+                        printf("Enter new major: ");
+                        fgets(students[i].major, sizeof(students[i].major), stdin);
+                        students[i].major[strcspn(students[i].major, "\n")] = '\0';
+                        printf("Major updated successfully!\n");
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        printf("Invalid choice!\n");
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        printf("Student with ID %d not found!\n", id);
+    }
+    
+    saveStudents();
+    pressAnyKeyToExit();
 }
 

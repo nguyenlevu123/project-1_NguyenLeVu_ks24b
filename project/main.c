@@ -10,24 +10,32 @@ void addStudent();
 
 int main(int argc, char *argv[]) {
 	
-	int choice;
-    do {
+	
+
+    while (1) {
         displayMenu();
+        int choice;
         scanf("%d", &choice);
+        getchar();
         switch (choice) {
-            case 1:
-                displayStudents();
-                break;
-            case 2:
-                addStudent();
-                break;
-                case 3:
-                printf("Thoat chuong trinh.\n");
-                exit(0);
-            default:
-                printf("Lua chon khong hop le, vui long nhap lai.\n");
+            case 1: displayStudents(); break;
+            case 2: addStudent(); break;
+            case 3: editStudent(); break;
+            case 4:
+                	printf("updating");
+                	break;
+                	case 5:
+                	printf("updating");
+                	break;
+            case 6: exit(0);
+            default: printf("L?a ch?n không h?p l?!\n");
         }
-        printf("\n");
-    }while(choice != 3);
-	return 0;
+    }
 }
+	
+	
+                
+                
+    //}while(choice != 0);
+//	return 0;
+//}

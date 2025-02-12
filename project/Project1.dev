@@ -24,12 +24,12 @@ HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
 CommandLine=
-Folders=include
+Folders=data,include,src
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000101000000
-UnitCount=4
+UnitCount=5
 
 [VersionInfo]
 Major=1
@@ -73,7 +73,7 @@ BuildCmd=
 [Unit4]
 FileName=fution.c
 CompileCpp=0
-Folder=include
+Folder=src
 Compile=1
 Link=1
 Priority=1000
@@ -84,6 +84,15 @@ BuildCmd=
 FileName=main.c
 CompileCpp=0
 Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit5]
+FileName=studentdata.bin
+Folder=data
 Compile=1
 Link=1
 Priority=1000

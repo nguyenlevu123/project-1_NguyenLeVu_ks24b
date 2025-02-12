@@ -1,7 +1,10 @@
 void displayMenu();
 void displayStudents();
 void addStudent();
+void pressAnyKeyToExit();
+void loadfile();
+void savefile();
 
-extern Student students[];  // Gi? s? 'Student' là ki?u struct c?a b?n
+extern Student students[];  
 extern int studentCount;
 
